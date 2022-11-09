@@ -1,6 +1,8 @@
 import {useFormik} from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
+import {useAuth} from '../../HOC/auth-context';
+import {useLoader} from '../../HOC/withLoader';
 import {ButtonSubmit} from './button-submit';
 import {Input} from './input';
 
@@ -10,11 +12,12 @@ type LoginFormProps = {
 export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
   navigation,
 }) => {
+  const loaderHook = useLoader();
+  const authHook = useAuth();
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
     password: Yup.string().required('Password is required'),
   });
-
   const {
     handleChange,
     handleSubmit,
@@ -29,7 +32,11 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
     initialValues: {email: '', password: '', twofa: ''},
     onSubmit: values => {
       if (values.email && values.password) {
-        navigation.navigate('Dashboard');
+        loaderHook.show();
+        authHook.logIn();
+        setTimeout(() => {
+          loaderHook.dissmiss();
+        }, 300);
       }
     },
   });

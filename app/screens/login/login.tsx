@@ -1,17 +1,19 @@
 import React from 'react';
-import {KeyboardTypeOptions, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {LoginForm} from '../../components/login/login-form';
+import {useLoader} from '../../HOC/withLoader';
 type LoginScreenProps = {
   navigation: any;
 };
 export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
+  const loaderHook = useLoader();
   return (
     <View style={styles.container}>
       <View>
         <LoginForm navigation={navigation} />
       </View>
       <View>
-        <Text style={styles.text}>
+        <Text style={styles.text} onPress={loaderHook.show}>
           Don't have an account yet?
           <Text style={styles.textGreen}>{' Sign Up'}</Text>
         </Text>
@@ -19,7 +21,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
