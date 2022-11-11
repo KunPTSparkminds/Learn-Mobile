@@ -1,24 +1,22 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React, {useState} from 'react';
+import React from 'react';
 import {
+  ActivityIndicator,
+  Modal,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
-  Modal,
-  TouchableOpacity,
 } from 'react-native';
-import {
-  AuthContextProvider,
-  useAuth,
-  useAuthContextValue,
-} from './app/HOC/auth-context';
+import {AuthContextProvider, useAuthContextValue} from './app/HOC/auth-context';
 import {LoaderProvider, useLoader, useLoaderValue} from './app/HOC/withLoader';
 import {LoginScreen} from './app/screens/login';
+import {UserDetail, UserScreen} from './app/screens/todo';
+import {Provider} from 'react-redux';
+import {store} from './app/redux/store';
 
 const Content = ({navigation}: any) => {
   return (
@@ -30,17 +28,7 @@ const Content = ({navigation}: any) => {
     </SafeAreaView>
   );
 };
-const Dashboard = () => {
-  const authHook = useAuth();
-  return (
-    <View>
-      <Text>Dashboard</Text>
-      <TouchableOpacity onPress={authHook.logOut} style={styles.button}>
-        <Text>Log Out</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+
 const Loader = () => {
   const loaderHook = useLoader();
   return (
@@ -65,48 +53,61 @@ const App = () => {
   const authValue = useAuthContextValue();
   return (
     <>
-      <AuthContextProvider value={authValue}>
-        <LoaderProvider value={loaderValue}>
-          {loaderValue.isShow && <Loader />}
-          <NavigationContainer>
-            <Stack.Navigator
-              screenOptions={{
-                headerTitleAlign: 'center',
-                headerTitleStyle: {
-                  color: '#ffffff',
-                  fontWeight: '600',
-                },
-              }}>
-              {authValue.isLoggedIn ? (
-                <>
-                  <Stack.Screen
-                    name="Dashboard"
-                    component={Dashboard}
-                    options={{
-                      headerStyle: {
-                        backgroundColor: '#17A9B8',
-                      },
-                      headerTintColor: '#fff',
-                    }}
-                  />
-                </>
-              ) : (
-                <>
-                  <Stack.Screen
-                    name="Sign In"
-                    component={Content}
-                    options={{
-                      headerStyle: {
-                        backgroundColor: '#17A9B8',
-                      },
-                    }}
-                  />
-                </>
-              )}
-            </Stack.Navigator>
-          </NavigationContainer>
-        </LoaderProvider>
-      </AuthContextProvider>
+      <Provider store={store}>
+        <AuthContextProvider value={authValue}>
+          <LoaderProvider value={loaderValue}>
+            {loaderValue.isShow && <Loader />}
+            <NavigationContainer>
+              <Stack.Navigator
+                screenOptions={{
+                  headerTitleAlign: 'center',
+                  headerTitleStyle: {
+                    color: '#ffffff',
+                    fontWeight: '600',
+                  },
+                }}>
+                {authValue.isLoggedIn ? (
+                  <>
+                    <Stack.Screen
+                      name="TUI GHET ANH BAO NGUYEN"
+                      component={UserScreen}
+                      options={{
+                        headerStyle: {
+                          backgroundColor: '#17A9B8',
+                        },
+                        headerTintColor: '#fff',
+                      }}
+                    />
+
+                    <Stack.Screen
+                      name="user-detail"
+                      component={UserDetail}
+                      options={{
+                        headerStyle: {
+                          backgroundColor: '#17A9B8',
+                        },
+                        headerTintColor: '#fff',
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Stack.Screen
+                      name="Sign In"
+                      component={Content}
+                      options={{
+                        headerStyle: {
+                          backgroundColor: '#17A9B8',
+                        },
+                      }}
+                    />
+                  </>
+                )}
+              </Stack.Navigator>
+            </NavigationContainer>
+          </LoaderProvider>
+        </AuthContextProvider>
+      </Provider>
     </>
   );
 };

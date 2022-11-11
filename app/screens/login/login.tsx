@@ -1,19 +1,47 @@
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import date from 'date-and-time';
+import React, {useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {LoginForm} from '../../components/login/login-form';
-import {useLoader} from '../../HOC/withLoader';
+import {useAuth} from '../../HOC/auth-context';
+import {useAppDispatch, useAppSelector} from '../../hooks';
+import {selectValue, setValue} from '../../redux/slice/testSlice';
+
 type LoginScreenProps = {
   navigation: any;
 };
+
 export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
-  const loaderHook = useLoader();
+  const dispatch = useAppDispatch();
+  const authHook = useAuth();
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = async () => {
+    try {
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      const createdAt = await AsyncStorage.getItem('createdAt');
+      if (isLoggedIn && createdAt) {
+        if (date.subtract(new Date(), new Date(createdAt)).toMinutes() < 1) {
+          authHook.logIn();
+        }
+      }
+    } catch (e) {
+      console.log('check e', e);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View>
         <LoginForm navigation={navigation} />
       </View>
       <View>
-        <Text style={styles.text} onPress={loaderHook.show}>
+        <Text
+          style={styles.text}
+          onPress={() => dispatch(setValue(Math.random()))}>
           Don't have an account yet?
           <Text style={styles.textGreen}>{' Sign Up'}</Text>
         </Text>
@@ -21,6 +49,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

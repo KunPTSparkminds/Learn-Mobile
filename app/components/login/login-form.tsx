@@ -3,6 +3,8 @@ import React from 'react';
 import * as Yup from 'yup';
 import {useAuth} from '../../HOC/auth-context';
 import {useLoader} from '../../HOC/withLoader';
+import {useAppDispatch} from '../../hooks';
+import {setUser} from '../../redux/slice/authSlice';
 import {ButtonSubmit} from './button-submit';
 import {Input} from './input';
 
@@ -12,6 +14,7 @@ type LoginFormProps = {
 export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
   navigation,
 }) => {
+  const dispatch = useAppDispatch();
   const loaderHook = useLoader();
   const authHook = useAuth();
   const LoginSchema = Yup.object().shape({
@@ -34,12 +37,15 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
       if (values.email && values.password) {
         loaderHook.show();
         authHook.logIn();
+        authHook.setValueToStorage(values.email);
+        dispatch(setUser(values.email));
         setTimeout(() => {
           loaderHook.dissmiss();
         }, 300);
       }
     },
   });
+
   return (
     <>
       <Input
