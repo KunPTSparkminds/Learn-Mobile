@@ -1,6 +1,6 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -17,6 +17,9 @@ import {LoginScreen} from './app/screens/login';
 import {UserDetail, UserScreen} from './app/screens/todo';
 import {Provider} from 'react-redux';
 import {store} from './app/redux/store';
+import {ChangePinScreen, SetUpLockScreen} from './app/screens/lock';
+import {LockScreen} from './app/screens/lock/lock-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Content = ({navigation}: any) => {
   return (
@@ -47,10 +50,31 @@ const Loader = () => {
     </View>
   );
 };
+
 const Stack = createNativeStackNavigator();
 const App = () => {
+  const [isActivePin, setIsActivePin] = useState(false);
   const loaderValue = useLoaderValue();
   const authValue = useAuthContextValue();
+
+  (async () => {
+    try {
+      // await AsyncStorage.removeItem('pinCode');
+      const final = await Promise.all([
+        AsyncStorage.getItem('pinCode'),
+        AsyncStorage.getItem('email'),
+      ]);
+      console.log('check final', final);
+      if (final && final.length > 0 && final[0]) {
+        const isActive =
+          JSON.parse(final[0]).filter((x: any) => x?.user === final[1])
+            ?.length > 0;
+        setIsActivePin(isActive);
+      }
+    } catch (e) {
+      return;
+    }
+  })();
   return (
     <>
       <Provider store={store}>
@@ -68,8 +92,29 @@ const App = () => {
                 }}>
                 {authValue.isLoggedIn ? (
                   <>
+                    {isActivePin ? (
+                      <Stack.Screen
+                        name="Lock"
+                        component={LockScreen}
+                        options={{
+                          headerStyle: {
+                            backgroundColor: '#17A9B8',
+                          },
+                        }}
+                      />
+                    ) : (
+                      <Stack.Screen
+                        name="set-lock"
+                        component={SetUpLockScreen}
+                        options={{
+                          headerStyle: {
+                            backgroundColor: '#17A9B8',
+                          },
+                        }}
+                      />
+                    )}
                     <Stack.Screen
-                      name="TUI GHET ANH BAO NGUYEN"
+                      name="home"
                       component={UserScreen}
                       options={{
                         headerStyle: {
@@ -89,11 +134,21 @@ const App = () => {
                         headerTintColor: '#fff',
                       }}
                     />
+                    <Stack.Screen
+                      name="change-pin"
+                      component={ChangePinScreen}
+                      options={{
+                        headerStyle: {
+                          backgroundColor: '#17A9B8',
+                        },
+                        headerTintColor: '#fff',
+                      }}
+                    />
                   </>
                 ) : (
                   <>
                     <Stack.Screen
-                      name="Sign In"
+                      name="sign-in"
                       component={Content}
                       options={{
                         headerStyle: {

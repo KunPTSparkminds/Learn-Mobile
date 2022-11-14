@@ -115,6 +115,11 @@ export const UserScreen: React.FunctionComponent<UserProps> = ({
       <Text style={styles.title} onPress={authHook.logOut}>
         {currentUser ? `user ${currentUser}` : `user ${email}`}
       </Text>
+      <Text
+        style={styles.changePin}
+        onPress={() => navigation.navigate('change-pin')}>
+        Change pin code
+      </Text>
       {data.length > 0 && (
         <FlatList
           style={styles.list}
@@ -204,5 +209,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f3e4e4',
+  },
+  changePin: {
+    textAlign: 'right',
+    padding: 20,
   },
 });

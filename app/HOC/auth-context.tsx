@@ -3,15 +3,19 @@ import React, {useContext, useState} from 'react';
 
 type AuthProps = {
   isLoggedIn: boolean;
+  isSetPinCode: boolean;
   logIn: () => void;
   logOut: () => void;
+  setPincode: () => void;
   setValueToStorage: (email: string) => void;
 };
 
 const DefaultValue: AuthProps = {
+  isSetPinCode: false,
   isLoggedIn: false,
   logIn: () => {},
   logOut: () => {},
+  setPincode: () => {},
   setValueToStorage: () => {},
 };
 
@@ -20,6 +24,11 @@ const AuthContext = React.createContext(DefaultValue);
 export const AuthContextProvider = AuthContext.Provider;
 export const useAuthContextValue = (): AuthProps => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSetPinCode, setIsSetPinCode] = useState(false);
+
+  const setPincode = async () => {
+    setIsSetPinCode(true);
+  };
 
   const setValueToStorage = async (email: string) => {
     try {
@@ -49,10 +58,12 @@ export const useAuthContextValue = (): AuthProps => {
   };
 
   return {
+    isSetPinCode,
     isLoggedIn,
     logIn,
     logOut,
     setValueToStorage,
+    setPincode,
   };
 };
 export const useAuth = (): AuthProps => {

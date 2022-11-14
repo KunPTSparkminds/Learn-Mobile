@@ -15,12 +15,15 @@ export const LoginForm: React.FunctionComponent<LoginFormProps> = ({
   navigation,
 }) => {
   const dispatch = useAppDispatch();
+
   const loaderHook = useLoader();
   const authHook = useAuth();
+
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
     password: Yup.string().required('Password is required'),
   });
+
   const {
     handleChange,
     handleSubmit,
