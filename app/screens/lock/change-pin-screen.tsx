@@ -68,9 +68,10 @@ export const ChangePinScreen: React.FunctionComponent<ChangePinProps> = ({
           (x: any) => x?.hash === arr[0]?.hash,
         );
         if (index >= 0) {
-          JSON.parse(newArr[0])[index].hash = hash;
-          console.log('check json', JSON.stringify(newArr[0]));
-          await AsyncStorage.setItem('pinCode', newArr[0]);
+          const cloneArray = JSON.parse(newArr[0]);
+          cloneArray[index].hash = hash;
+          console.log(cloneArray);
+          await AsyncStorage.setItem('pinCode', JSON.stringify(cloneArray));
 
           await authHook.logOut();
           await dispatch(setStep(1));
