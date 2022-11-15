@@ -13,6 +13,11 @@ import * as Yup from 'yup';
 type LockScreenProps = {
   navigation: any;
 };
+type PinProps = {
+  hash: string;
+  isActive: boolean;
+  user: string;
+};
 export const LockScreen: React.FunctionComponent<LockScreenProps> = ({
   navigation,
 }) => {
@@ -48,7 +53,7 @@ export const LockScreen: React.FunctionComponent<LockScreenProps> = ({
       ]);
       if (final && final.length > 0 && final[0]) {
         const infoUser = JSON.parse(final[0]).filter(
-          (x: any) => x?.user === final[1],
+          (x: PinProps) => x?.user === final[1],
         );
         const isSame = await BcryptReactNative.compareSync(
           pin,

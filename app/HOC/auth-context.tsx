@@ -3,19 +3,15 @@ import React, {useContext, useState} from 'react';
 
 type AuthProps = {
   isLoggedIn: boolean;
-  isSetPinCode: boolean;
   logIn: () => void;
   logOut: () => void;
-  setPincode: () => void;
   setValueToStorage: (email: string) => void;
 };
 
 const DefaultValue: AuthProps = {
-  isSetPinCode: false,
   isLoggedIn: false,
   logIn: () => {},
   logOut: () => {},
-  setPincode: () => {},
   setValueToStorage: () => {},
 };
 
@@ -24,26 +20,22 @@ const AuthContext = React.createContext(DefaultValue);
 export const AuthContextProvider = AuthContext.Provider;
 export const useAuthContextValue = (): AuthProps => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isSetPinCode, setIsSetPinCode] = useState(false);
-
-  const setPincode = async () => {
-    setIsSetPinCode(true);
-  };
 
   const setValueToStorage = async (email: string) => {
+    const currentUser: [string, string] = ['email', email];
+    const isLoggedIn: [string, string] = ['isLoggedIn', 'true'];
+    const createdAt: [string, string] = ['createdAt', new Date().toISOString()];
     try {
-      await AsyncStorage.setItem('isLoggedIn', 'true');
-      await AsyncStorage.setItem('email', email);
-      await AsyncStorage.setItem('createdAt', new Date().toISOString());
+      await AsyncStorage.multiSet([currentUser, isLoggedIn, createdAt]);
     } catch (error) {
       return;
     }
   };
 
   const resetAuth = async () => {
+    const keys = ['isLoggedIn', 'createdAt', 'email'];
     try {
-      await AsyncStorage.removeItem('isLoggedIn');
-      await AsyncStorage.removeItem('createdAt');
+      await AsyncStorage.multiRemove(keys);
     } catch (error) {
       return;
     }
@@ -52,18 +44,17 @@ export const useAuthContextValue = (): AuthProps => {
   const logIn = () => {
     setIsLoggedIn(true);
   };
+
   const logOut = () => {
-    setIsLoggedIn(false);
     resetAuth();
+    setIsLoggedIn(false);
   };
 
   return {
-    isSetPinCode,
     isLoggedIn,
     logIn,
     logOut,
     setValueToStorage,
-    setPincode,
   };
 };
 export const useAuth = (): AuthProps => {

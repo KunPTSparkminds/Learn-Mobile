@@ -17,30 +17,40 @@ import {useAuth} from '../../HOC/auth-context';
 type ChangePinProps = {
   navigation: any;
 };
+type PinProps = {
+  hash: string;
+  isActive: boolean;
+  user: string;
+};
+const SALT_AROUND = 10;
 export const ChangePinScreen: React.FunctionComponent<ChangePinProps> = ({
   navigation,
 }) => {
   const authHook = useAuth();
   const dispatch = useAppDispatch();
+
   const [error, setError] = useState<string>('');
+
   const step = useAppSelector(selectStep);
+
   const PinSchema = Yup.object().shape({
     pin: Yup.string().required('Required').min(6, 'Must be exactly 6 digits'),
   });
+
   const NewPinSchema = Yup.object().shape({
     newPin: Yup.string()
       .required('Required')
       .min(6, 'Must be exactly 6 digits'),
   });
+
   const handleChangePin = async (pin: string) => {
-    console.log('in old pin', pin);
     const final = await Promise.all([
       AsyncStorage.getItem('pinCode'),
       AsyncStorage.getItem('email'),
     ]);
     if (final && final.length > 0 && final[0]) {
       const infoUser = JSON.parse(final[0]).filter(
-        (x: any) => x?.user === final[1],
+        (x: PinProps) => x?.user === final[1],
       );
       const isSame = await BcryptReactNative.compareSync(pin, infoUser[0].hash);
       if (isSame) {
@@ -50,10 +60,10 @@ export const ChangePinScreen: React.FunctionComponent<ChangePinProps> = ({
       }
     }
   };
+
   const handleChangeNewPin = async (pin: string) => {
     try {
-      console.log('check new pin', pin);
-      const salt = await BcryptReactNative.getSalt(10);
+      const salt = await BcryptReactNative.getSalt(SALT_AROUND);
       const hash = await BcryptReactNative.hash(salt, pin);
       const final = await Promise.all([
         AsyncStorage.getItem('pinCode'),
@@ -62,25 +72,25 @@ export const ChangePinScreen: React.FunctionComponent<ChangePinProps> = ({
       const newArr = [...final];
       if (newArr && newArr.length > 0 && newArr[0]) {
         const arr = JSON.parse(newArr[0]).filter(
-          (x: any) => x?.user === newArr[1],
+          (x: PinProps) => x?.user === newArr[1],
         );
         const index = JSON.parse(newArr[0]).findIndex(
-          (x: any) => x?.hash === arr[0]?.hash,
+          (x: PinProps) => x?.hash === arr[0]?.hash,
         );
         if (index >= 0) {
           const cloneArray = JSON.parse(newArr[0]);
           cloneArray[index].hash = hash;
-          console.log(cloneArray);
           await AsyncStorage.setItem('pinCode', JSON.stringify(cloneArray));
 
-          await authHook.logOut();
-          await dispatch(setStep(1));
+          authHook.logOut();
+          dispatch(setStep(1));
         }
       }
     } catch (e) {
       return;
     }
   };
+
   const {
     handleChange,
     handleSubmit,

@@ -21,6 +21,12 @@ import {ChangePinScreen, SetUpLockScreen} from './app/screens/lock';
 import {LockScreen} from './app/screens/lock/lock-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type PinProps = {
+  hash: string;
+  isActive: boolean;
+  user: string;
+};
+
 const Content = ({navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
@@ -52,29 +58,32 @@ const Loader = () => {
 };
 
 const Stack = createNativeStackNavigator();
+
 const App = () => {
-  const [isActivePin, setIsActivePin] = useState(false);
   const loaderValue = useLoaderValue();
   const authValue = useAuthContextValue();
 
-  (async () => {
-    try {
-      // await AsyncStorage.removeItem('pinCode');
-      const final = await Promise.all([
-        AsyncStorage.getItem('pinCode'),
-        AsyncStorage.getItem('email'),
-      ]);
-      console.log('check final', final);
-      if (final && final.length > 0 && final[0]) {
-        const isActive =
-          JSON.parse(final[0]).filter((x: any) => x?.user === final[1])
-            ?.length > 0;
-        setIsActivePin(isActive);
+  const [isActivePin, setIsActivePin] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const final = await Promise.all([
+          AsyncStorage.getItem('pinCode'),
+          AsyncStorage.getItem('email'),
+        ]);
+        console.log('check finassl', final);
+        if (final && final.length > 0 && final[0]) {
+          const isActive =
+            JSON.parse(final[0]).filter((x: PinProps) => x?.user === final[1])
+              ?.length > 0;
+          setIsActivePin(isActive);
+        }
+      } catch (e) {
+        return;
       }
-    } catch (e) {
-      return;
-    }
-  })();
+    })();
+  }, [authValue.isLoggedIn]);
   return (
     <>
       <Provider store={store}>
